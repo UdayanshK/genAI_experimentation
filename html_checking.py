@@ -41,3 +41,20 @@ def validate_html(html_code: str):
 
     finally:
         os.remove(temp_file_path)
+
+____________SERVER________________________-
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from html_validator import validate_html
+
+app = FastAPI()
+
+class HTMLRequest(BaseModel):
+    html: str
+
+@app.post("/validate")
+def validate(request: HTMLRequest):
+    try:
+        return validate_html(request.html)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
