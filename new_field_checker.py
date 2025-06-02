@@ -23,13 +23,18 @@ def extract_standard_fields(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    pattern = re.compile(r'(.*?)\nClass:.*?\n(<div.*?</div>)', re.DOTALL)
-    fields = pattern.findall(content)
+    # Split blocks based on the dashed separator
+    blocks = re.split(r'-{5,}', content)
 
     standard_fields = []
-    for field_name, html in fields:
-        standard_fields.append((field_name.strip(), html.strip()))
-    return standard_fields
+    for block in blocks:
+        name_match = re.search(r'Field Name:\s*(.+)', block)
+        html_match = re.search(r'Form Details:\s*(<div.*?</div>)', block, re.DOTALL)
+
+        if name_match and html_match:
+            field_name = name_match.group(1).strip()
+            html_code = html_match.group(1).strip()
+            standard_fields.append((field_name, html_code))
 
 def extract_div_blocks(html_content):
     div_blocks = []
